@@ -23,6 +23,8 @@ RED       = (255,   0,   0)
 GREEN     = (  0, 255,   0)
 DARKGREEN = (  0, 155,   0)
 DARKGRAY  = ( 40,  40,  40)
+BLUE      = (  0,   0, 255)
+DARKBLUE  = (  0,   0, 155)
 BGCOLOR = WHITE
 
 UP = 'up'
@@ -79,7 +81,10 @@ def runGame():
     # Set a random start point.
     startx = random.randint(5, CELLWIDTH - 6)
     starty = random.randint(5, CELLHEIGHT - 6)
+    startx2 = random.randint(5, CELLWIDTH - 6)
+    starty2 = random.randint(5, CELLHEIGHT - 6)
     wormCoords = [{'x': startx,     'y': starty}]
+    wormCoords2 = [{'x': startx2,     'y': starty2}]
     direction = RIGHT
 
     # Start the apple in a random place.
@@ -104,6 +109,8 @@ def runGame():
         # check if the worm has hit itself or the edge
         if wormCoords[HEAD]['x'] == -1 or wormCoords[HEAD]['x'] == CELLWIDTH or wormCoords[HEAD]['y'] == -1 or wormCoords[HEAD]['y'] == CELLHEIGHT:
             return # game over
+        if wormCoords2[HEAD]['x'] == -1 or wormCoords2[HEAD]['x'] == CELLWIDTH or wormCoords2[HEAD]['y'] == -1 or wormCoords2[HEAD]['y'] == CELLHEIGHT:
+            return # game over
         #for wormBody in wormCoords[1:]:
         #    if wormBody['x'] == wormCoords[HEAD]['x'] and wormBody['y'] == wormCoords[HEAD]['y']:
         #        return # game over
@@ -115,6 +122,13 @@ def runGame():
         #else:
         #    del wormCoords[-1] # remove worm's tail segment
 
+        # check if worm has eaten an apple
+        if wormCoords2[HEAD]['x'] == apple['x'] and wormCoords2[HEAD]['y'] == apple['y']:
+            # don't remove worm's tail segment
+            apple = getRandomLocation() # set a new apple somewhere
+        ##else:
+        #    del wormCoords2[-1] # remove worm's tail segment
+
         # move the worm by adding a segment in the direction it is moving
         if direction == UP:
             newHead = {'x': wormCoords[HEAD]['x'], 'y': wormCoords[HEAD]['y'] - 1}
@@ -125,11 +139,24 @@ def runGame():
         elif direction == RIGHT:
             newHead = {'x': wormCoords[HEAD]['x'] + 1, 'y': wormCoords[HEAD]['y']}
         wormCoords = [newHead]
+
+        # move the worm by adding a segment in the direction it is moving
+        if direction == UP:
+            newHead2 = {'x': wormCoords2[HEAD]['x'], 'y': wormCoords2[HEAD]['y'] - 1}
+        elif direction == DOWN:
+            newHead2 = {'x': wormCoords2[HEAD]['x'], 'y': wormCoords2[HEAD]['y'] + 1}
+        elif direction == LEFT:
+            newHead2 = {'x': wormCoords2[HEAD]['x'] - 1, 'y': wormCoords2[HEAD]['y']}
+        elif direction == RIGHT:
+            newHead2 = {'x': wormCoords2[HEAD]['x'] + 1, 'y': wormCoords2[HEAD]['y']}
+        wormCoords2 = [newHead2]
+        
         DISPLAYSURF.fill(BGCOLOR)
         drawGrid()
-        drawWorm(wormCoords)
+        drawWorm(wormCoords, DARKGREEN, GREEN)
+        drawWorm(wormCoords2, DARKBLUE, BLUE)
         drawApple(apple)
-        drawScore(len(wormCoords) - 3)
+        #drawScore(len(wormCoords) - 3)
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
@@ -219,14 +246,14 @@ def drawScore(score):
     DISPLAYSURF.blit(scoreSurf, scoreRect)
 
 
-def drawWorm(wormCoords):
+def drawWorm(wormCoords, color1, color2):
     for coord in wormCoords:
         x = coord['x'] * CELLSIZE
         y = coord['y'] * CELLSIZE
         wormSegmentRect = pygame.Rect(x, y, CELLSIZE, CELLSIZE)
-        pygame.draw.rect(DISPLAYSURF, DARKGREEN, wormSegmentRect)
+        pygame.draw.rect(DISPLAYSURF, color1, wormSegmentRect)
         wormInnerSegmentRect = pygame.Rect(x + 4, y + 4, CELLSIZE - 8, CELLSIZE - 8)
-        pygame.draw.rect(DISPLAYSURF, GREEN, wormInnerSegmentRect)
+        pygame.draw.rect(DISPLAYSURF, color2, wormInnerSegmentRect)
 
 
 def drawApple(coord):
